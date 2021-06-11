@@ -1,0 +1,26 @@
+Mem_100	DCD		0x3224FFFF ;
+Mem_104	DCD		0x22282317
+Mem_108	DCD		0x17208013
+Mem_10C	DCD		0x2D142580
+Start	MOV		R1,#0x100 ;
+		MOV		R4,#0x100 ;
+		MOV		R0,#0 ;
+		STRB		R0,[R4] ;
+		ADD		R1,R1,#2 ;
+Loop		LDRB		R3,[R1] ;
+		CMP		R3,#0x80 ;
+		BEQ		Done ;
+		ADD		R0,R0,#1 ;
+		LDRB		R3,[R1]
+		CMP		R3,#36 ;
+		BHS		HotFound ;
+		ADD		R1,R1,#1 ;
+		B		Loop ;
+HotFound	LDRB		R2,[R4] ;
+		ADD		R2,R2,#1 ;
+		STRB		R2,[R4] ;
+		ADD		R1,R1,#1 ;
+		B		Loop ;
+Done		ADD		R4,R4,#1
+		STRB		R0,[R4] ;
+		END

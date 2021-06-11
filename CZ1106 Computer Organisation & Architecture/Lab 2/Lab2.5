@@ -1,0 +1,22 @@
+STR_C	DCD		0x12345678,0xABBAABBA,0xBABACDCD,0xDEADBEEF,0x01234567,0xBADCAB00,0x00000000
+		
+		
+		ADR		SP,0xFFFFFFFC 	; initialize Stack Pointer (SP) to top of memory
+		MOV		R0,#0x100 	; Fill R0 with start address
+		STMFD	SP!,{R0} 		; push start address of string to stack
+		BL		Strlen 		; call subroutine Mean
+		ADD		SP,SP,#4		; perform appropriate housekeeping of the stack
+		END
+		
+		;		program to return length of string in R0 to calling program
+		;		include count for the terminator character 0x000
+Strlen	STMFD	SP!,{R1-R3}		; save registers used in Strlen subroutine to stack
+		MOV		R3,#0			; initialise counter R3 with value 0
+		LDR		R1,[SP,#12]		; load start addr of string to R1
+Loop		LDRB		R2,[R1],#1		; get char value (4 bytes) into R2 & increment str pointer R1 by 4 bytes
+		ADD		R3,R3,#1			; count + 1
+		CMP		R2,#0x00			; compare byte value with terminating character
+		BNE		Loop				; loop until terminating character 0x00 is found
+		MOV		R0,R3			; store count result in R0
+		LDMFD	SP!,{R1-R3}		; restore registers used in subroutine
+		MOV		PC,LR			; back to calling program

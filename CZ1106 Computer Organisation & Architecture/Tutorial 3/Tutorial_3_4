@@ -1,0 +1,42 @@
+N1		DCD		0x3
+M1		DCD		0xFFFFFFFF,0X111
+M2		DCD		0x2,0x600
+M3		DCD		0x222,0x100
+		
+START	MOV		SP, #0xFFFFFFFC	;initialise stack pointer
+		LDR		R0,=N1			;get memory address of N1
+		LDR		R1,[R0]			;get value of N1
+		ADD		R0,R0,#4			;get starting memory address of M1
+		STMFD	SP!,{R1,R0}		;push values N1 & address M1 on to stack
+		BL		SubA				;make a call to subroutine SubA
+		END
+		
+SubA		STMFD	SP!,{R4-R7}		;save value registers R4-R7 on to the stack
+		ADD		SP,SP,#-12		;create a 3-word stack frame on the stack
+		LDR		R4,[SP,#32]		;get contents of N1 on the stack into R4
+		STR		R4,[SP]			;use 1st word in stack frame to save value of N1
+		LDR		R4,[SP,#28]		;get the address of M1 on the stack into R4
+		MOV		R5,#0
+		STR		R5,[SP,#4]		;clear 2nd word in stack frame
+		STR		R5,[SP,#8]		;clear 3rd word in stack frame
+Loop		LDR		R5,[SP,#4]		;get sum of lower words
+		LDR		R6,[R4],#4		;get value of lower word
+		ADDS		R5,R5,R6			;add lower word to sum INFLUENCE FLAGS TO DETECT CARRY!!
+		STR		R5,[SP,#4]		;store sum back to 2nd word in stack frame
+		LDR		R5,[SP,#8]		;get sum of upper words
+		LDR		R6,[R4],#4		;get value of upper word
+		ADC		R5,R5,R6			;add upper word to sum WITH CARRY FROM LOWER WORD!!
+		STR		R5,[SP,#8]		;store sum back to 3rd word in stack frame
+		LDR		R5,[SP]			;decrement value of N1 in 1st word of stack frame
+		SUBS		R5,R5,#1
+		STR		R5,[SP]
+		BNE		Loop				;loop to add again if N1 != 0
+		LDR		R5,[SP,#4]		;copy result to last array item
+		LDR		R6,[SP,#8]
+		STR		R5,[R4,#-8]!
+		STR		R6,[R4,#4]
+		ADD		SP,SP,#12			;collapse stack frame
+		LDMFD	SP!,{R4-R7}		;restore original registers
+		MOV		PC,LR			;BX LR
+		
+		

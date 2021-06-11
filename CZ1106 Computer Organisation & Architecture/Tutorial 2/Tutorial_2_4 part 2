@@ -1,0 +1,32 @@
+Mem_100	DCD		0
+Mem_104	DCD		-1
+Mem_10C	DCD		-2
+Mem_110	DCD		-3
+Mem_114	DCD		-4
+Mem_11C	DCD		-5
+Mem_120	DCD		-6
+Mem_124	DCD		-7
+		;--------------------------------------------
+		;Average	of 8 unsigned numbers
+		;Result	based on constants above should be:
+		;R0		= 3	(Quotient) and
+		;R1		= 4	(Remainder)
+		;------------------------------------------
+Start	MOV		R1, #0x100	; initialize array pointer
+		MOV		R0, #0		; initialise cumulating register to 0
+		MOV		R2, #8		; initialise loop counter
+Loop		LDR		R3, [R1], #4   ; store current value into R3, increment array pointer
+		ADD		R0, R0, R3	; add number to cumulating register
+		SUBS		R2, R2, #1	; decrement loop counter by 1, check Z flag
+		BNE		Loop			; loop 8 times
+Div		;MOV		R1,R0 ; make copy of cumulated sum in R1
+		;MOVS	R0,R0,ASR #3 ; arithmetic shift right by 3 bits to divide by 8
+		;ADDMI	R0,R0,#1 ; add 1 if quotient is -ve to round quotient towards zero
+		;ANDS	R1,R1,#0x07 ; clear all bits except lowest 3 bits to get remainder in R1
+		;SUBEQ	R0,R0,#1
+		
+		
+		ANDS		R1, R0, #7	; get remainder, activate NZCV
+		MOV		R0, R0, ASR #3 ; get quotient
+		ADDNE	R0, R0, #1	; add quotient by 1 if remainder is non-zero
+		END

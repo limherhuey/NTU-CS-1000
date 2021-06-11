@@ -1,0 +1,33 @@
+		;--------------------------------------------------------------
+		;Expt_1e	Application #3 - Sorting into ascending order
+		;1.		Sort the 7 integers in array N-Array in ascending order
+		;2.		The smallest value starts are N_Array after execution
+		;-------------------------------------------------------------
+		;Allocate	variables and constants into data memory
+DataArea	EQU		0x00000100	;data area starts at 0x0100
+N_Size	EQU		7			;declare size of N-Array
+N_Array	DCD		0x00000010	;start of N-array, decimal (16)
+N_2		DCD		0x00000003   	;decimal (3)
+N_3		DCD		0xFFFFFFFF	;decimal (-1)
+N_4		DCD		0x00000003	;decimal (3)
+N_5		DCD		0xFFFFFFFD	;decimal (-3)
+N_6		DCD		0x00000020	;decimal (32)
+N_7		DCD		0xFFFFFFEE	;decimal (-18)
+		
+Start	MOV		R1,#DataArea	;initialise pointer to start of array
+		MOV		R0,#7		;initialise outer loop counter
+StartLoop	SUBS		R0,R0,#1		;decrement outer loop counter
+		BEQ		Done			;sorting done (last element is already sorted)
+		MOV		R5,R0		;initialise inner loop counter
+		LDR		R3,[R1], #4	;get current array element to compare
+		MOV		R2,R1		;initialise 2nd pointer
+Loop		LDR		R4,[R2],#4	;get next array element to compare with current
+		CMP		R4,R3		;compare values
+		BGE		Cont			;if next >= current (signed), continue
+Switch	STR		R4,[R1,#-4]	;store smaller value at lower memory location
+		STR		R3,[R2,#-4]	;store larger value at higher memory location
+		MOV		R3,R4		;update current array element
+Cont		SUBS		R5,R5,#1		;decrement inner loop counter
+		BNE		Loop			;inner loop
+		B		StartLoop		;back to outer loop when inner loop is finished
+Done		END
